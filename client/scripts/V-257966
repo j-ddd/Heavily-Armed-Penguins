@@ -1,0 +1,28 @@
+
+
+
+# RHEL 9 must not respond to Internet Control Message Protocol (ICMP) echoes
+# sent to a broadcast address.
+# Finding ID: V-257966
+# Version: RHEL-09-253055
+# Rule ID: SV-257996r925885_rule
+# Severity: Medium
+# Command: CONNECTION ICMP UP
+
+var=net.ipv4.icmp_echo_ignore_broadcasts
+sysctlcmd="sudo sysctl $var"
+catconfigcmd="sudo /usr/lib/systemd/systemd-sysctl --cat-config"
+grepcmds="egrep -v '^(#|$)' | grep -F $var"
+
+# if a line is commented out, or value of variable is not "1"
+if [[ $($sysctlcmd | grep "#.*$var" | wc | awk '{ print $1 }') == 1 ||
+      $($sysctlcmd | awk '{ print $3 }') != 1 ]]
+then
+  # update the value of the variable
+  sudo sysctl $var=1 >/dev/null
+# else if a line is not returned and the variable does not exist
+elif [[ $($sysctlcmd | wc | awk '{ print $1 }') != 1 &&
+        $($catconfigcmd | grep $var | wc | awk '{ print $1 }') == 0 ]]
+then
+  echo CONNECTION ICMP UP failed. $var variable does not exist. >&2
+fi

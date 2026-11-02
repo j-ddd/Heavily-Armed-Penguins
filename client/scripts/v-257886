@@ -1,0 +1,27 @@
+
+
+
+# RHEL 9 /var/log/messages file must have mode 0640 or less permissive.
+# Finding ID: V-257886
+# Version: RHEL-09-232030
+# Rule ID: SV-257886r925645_rule
+# Severity: Medium
+# Command: KERNEL MESG NONPERM
+
+p0000=----------.
+p0040=----r-----.
+p0400=-r--------.
+p0440=-r--r-----.
+p0600=-rw-------.
+p0640=-rw-r-----.
+
+# if the file exists
+if [[ $(ls /var/log/messages 2>&1) == /var/log/messages ]]
+then
+  mode=$(ls -l /var/log/messages | awk '{ print $1 }')
+  if [[ $mode != $p0000 && $mode != $p0040 && $mode != $p0400 &&
+        $mode != $p0440 && $mode != $p0600 && $mode != $p0640 ]]
+  then
+    sudo chmod 0640 /var/log/messages
+  fi
+fi

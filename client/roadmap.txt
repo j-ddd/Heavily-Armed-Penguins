@@ -1,0 +1,5 @@
+Steps:
+
+Template gets created, put into a preconfigured directory (default config/config), template gets read, translated, and appended to a file in the ssh directory.
+
+Another program will take this bash script and run it sequentially on a set of machines.

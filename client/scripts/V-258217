@@ -1,0 +1,25 @@
+
+
+
+# RHEL 9 must generate audit records for all account creations, modifications,
+# disabling, and termination events that affect /etc/sudoers.
+# Finding ID: V-258217
+# RHEL-09-654215
+# Rule ID: SV-258217r926638_rule
+# Severity: Medium
+# Command: KERNEL AUDIT SUDOERS
+
+auditfile=/etc/audit/rules.d/audit.rules
+auditrule='-w /etc/sudoers -p wa -k identity'
+
+# if the command does not return a line
+if [[ $(sudo auditctl -l | grep /etc/sudoers | wc | awk '{ print $1 }') == 0 ]]
+then
+  # add it
+  sudo su root -c "echo $auditrule >>$auditfile"
+# else if the line is commented out
+elif [[ $(sudo auditctl -l | grep '#.*/etc/sudoers' | wc | awk '{ print $1 }') == 1 ]]
+then
+  # uncomment it
+  sudo su root -c "sed -i'""' 's/.*\/etc\/sudoers.*/sudoers -p wa -k identity/' $auditfile"
+fi

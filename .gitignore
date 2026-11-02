@@ -1,0 +1,18 @@
+# Secrets & credentials
+cert.pem
+key.pem
+*.pem
+*.p12
+client/pass.exp
+server2.3/backend/config/default.json
+
+# Dependencies
+node_modules/
+client/bin/
+
+# OS
+.DS_Store
+
+# Build artifacts
+*.o
+*.out

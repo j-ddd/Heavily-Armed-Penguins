@@ -1,0 +1,25 @@
+
+
+
+# RHEL 9 must enable SELinux targeted policy.
+# Finding ID: V-258079
+# Version: RHEL-09-431015
+# Rule ID: SV-258079r926224_rule
+# Severity: Medium
+# Command: KERNEL SELINUX TARGETED
+
+configfile=/etc/selinux/config
+
+# if loaded policy name is not "targeted"
+if [[ $(sestatus | grep 'policy name' | awk '{ print $4 }') != targeted ]]
+then
+  # if variable SELINUXTYPE does not exist in configuration file
+  if [[ $(grep SELINUXTYPE= $configfile | wc | awk '{ print $1 }') == 0 ]]
+  then
+    # add it
+    sudo echo SELINUXTYPE=targeted >>$configfile
+  else
+    # change value to targeted
+    sudo sed -i"" 's/.*\(SELINUXTYPE\).*/\1=targeted/' $configfile
+  fi
+fi

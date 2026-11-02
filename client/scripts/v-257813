@@ -1,0 +1,24 @@
+
+
+
+# RHEL 9 must disable storing core dumps.
+# Finding ID: V-257813
+# Version: RHEL-09-213090
+# Rule ID: SV-257813r925426_rule
+# Severity: Medium
+# Command: KERNEL COREDUMP OFF
+
+configfile=/etc/systemd/coredump.conf
+
+# if the "Storage" item is missing
+if [[ $(sudo grep Storage $configfile | wc | awk '{ print $1 }') == 0 ]]
+then
+  # add it to the configuration file
+  sudo su root -c "echo Storage=none >>$configfile"
+# else if the line is commented out or the value is not "none"
+elif [[ $(sudo grep '#.*Storage' $configfile | wc | awk '{ print $1 }') == 1 ||
+        $(sudo grep Storage $configfile) != Storage=none ]]
+then
+  # update the line
+  sudo su root -c "sed -i "" 's/.*Storage.*/Storage=none/' $configfile"
+fi

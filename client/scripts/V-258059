@@ -1,0 +1,27 @@
+# The root account must be the only account having unrestricted access to RHEL
+# 9 system.
+# Finding ID: V-258059
+# Version: RHEL-09-411100
+# Rule ID: SV-258059r926164_rule
+# Severity: High
+# Command: KERNEL USER ONEROOT
+# Comments: This script passes the -f (or --force) option to the userdel command.
+#           The following is a note on the -f option from userdel's man page:
+#
+#             Note: This option is dangerous and may leave your system in an inconsistent state.
+#
+#           Read the man page on userdel to understand the implications of the
+#           command, and therefore this script.
+
+# get all non-root users with UID 0
+sed 's/:/ /g' /etc/passwd | awk ' $3 == 0 && $1 != "root" ' >.accts.tmp
+
+# if there are any such users
+if [[ $(ls .accts.tmp) == ".accts.tmp" ]]
+then
+  # delete all of those accounts with userdel
+  awk '{ printf("sudo su root -c \"userdel -f %s\"\n", $1); }' .accts.tmp >.cmds.sh.tmp
+  chmod +x .cmds.sh.tmp
+  ./.cmds.sh.tmp 2>/dev/null
+  rm .*.tmp
+fi
